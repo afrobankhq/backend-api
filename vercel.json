@@ -6,9 +6,6 @@
             "runtime": "nodejs20.x"
         }
     },
-    "builds": [
-        { "src": "server.js", "use": "@vercel/node" }
-    ],
     "routes": [
         { "src": "/(.*)", "dest": "server.js" }
     ]
