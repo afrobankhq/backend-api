@@ -1,6 +1,6 @@
 
 const BASE_URL = 'https://api.blockradar.co/v1';
-const WALLET_ID = process.env.BLOCKRADAR_WALLET_ID;
+const WALLET_ID = process.env.BLOCKRADAR_WALLET_ID; // This is the wallet ID for the wallet you want to use
 
 if (!WALLET_ID) {
   throw new Error('Missing BLOCKRADAR_WALLET_ID in .env');
