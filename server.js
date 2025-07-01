@@ -12,7 +12,6 @@ app.use(express.json());
 
 // Root route
 app.get('/', (req, res) => {
-  logger.info('Root endpoint hit');
   res.send('Welcome to AfroBank API Server');
 });
 
