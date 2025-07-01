@@ -1,15 +1,11 @@
 {
     "version": 2,
     "name": "afrobank-backend-api",
-    "builds": [
-        { 
-            "src": "server.js", 
-            "use": "@vercel/node",
-            "config": {
-                "runtime": "nodejs20.x"
-            }
+    "functions": {
+        "server.js": {
+            "runtime": "nodejs20.x"
         }
-    ],
+    },
     "routes": [
         { "src": "/(.*)", "dest": "server.js" }
     ]
