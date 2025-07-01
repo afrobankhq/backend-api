@@ -1,18 +1,68 @@
-import axios from 'axios';
-
-const BLOCKRADAR_API_KEY = process.env.BLOCKRADAR_API_KEY;
 const BASE_URL = 'https://api.blockradar.co/v1';
 
-const api = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    Authorization: `Bearer ${BLOCKRADAR_API_KEY}`,
-  },
-});
+/**
+ * Helper function to make fetch requests
+ */
+const request = async (walletId, path, options = {}) => {
+  const url = `${BASE_URL}${path}`;
 
-export const createAddress = async (blockchain, label) => {
-  const res = await api.post('/addresses', { blockchain, label });
-  return res.data;
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${walletId}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || 'Blockradar API error');
+  }
+
+  return res.json();
 };
 
-export default { createAddress };
+/**
+ * Create a blockchain address
+ */
+export const createAddress = async (walletId, blockchain, label) => {
+  return request(walletId, `/wallets/${walletId}/addresses`, {
+    method: 'POST',
+    body: JSON.stringify({ blockchain, label }),
+  });
+};
+
+/**
+ * Get a specific address info
+ */
+export const getAddress = async (walletId, addressId) => {
+  return request(walletId, `/wallets/${walletId}/addresses/${addressId}`, {
+    method: 'GET',
+  });
+};
+
+/**
+ * List all addresses under the wallet
+ */
+export const listAddresses = async (walletId) => {
+  return request(walletId, `/wallets/${walletId}/addresses`, {
+    method: 'GET',
+  });
+};
+
+/**
+ * List deposits for an address
+ */
+export const listDeposits = async (walletId, addressId) => {
+  return request(walletId, `/wallets/${walletId}/addresses/${addressId}/deposits`, {
+    method: 'GET',
+  });
+};
+
+export default {
+  createAddress,
+  getAddress,
+  listAddresses,
+  listDeposits,
+};
