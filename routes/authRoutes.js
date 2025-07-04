@@ -6,7 +6,7 @@ import {
   changePin,
   resetPin,
 } from '../controllers/authController.js';
-
+import { verifyFirebaseToken } from '../middlewares/verifyFirebaseToken.js';
 import { authenticate } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -16,10 +16,13 @@ router.post('/register', (req, res, next) => {
   next();
 }, registerUser);
 
+
 router.post('/login', (req, res, next) => {
   console.log('Login endpoint called at:', new Date().toISOString(), 'Body:', req.body);
   next();
 }, loginUser);
+
+router.post('/signup', verifyFirebaseToken, registerUser);
 
 router.get('/user/:phoneNumber', (req, res, next) => {
   console.log('Get user endpoint called at:', new Date().toISOString(), 'Phone:', req.params.phoneNumber);
