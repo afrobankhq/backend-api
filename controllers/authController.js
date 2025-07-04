@@ -7,52 +7,39 @@ import { generateToken } from '../utils/jwt.js';
  * Register user with phone OTP and setup PIN
  */
 export const registerUser = async (req, res) => {
-    const { phoneNumber, pin, blockchain = 'polygon-mainnet' } = req.body;
-  
-    if (!phoneNumber || !pin) {
-      return res.status(400).json({ error: 'Phone number and PIN are required' });
+  const { pin } = req.body;
+  const phoneNumber = req.phoneNumber; // Set by verifyFirebaseToken middleware
+
+  if (!phoneNumber || !pin) {
+    return res.status(400).json({ error: 'Phone number and PIN are required' });
+  }
+
+  try {
+    const userRef = db.collection('users').doc(phoneNumber);
+    const userSnapshot = await userRef.get();
+
+    if (userSnapshot.exists) {
+      return res.status(400).json({ error: 'User already exists' });
     }
-  
-    try {
-      const userRef = db.collection('users').doc(phoneNumber);
-      const userSnapshot = await userRef.get();
-  
-      if (userSnapshot.exists) {
-        return res.status(400).json({ error: 'User already exists. Please login.' });
-      }
-  
-      // ✅ Hash the PIN
-      const saltRounds = 10;
-      const hashedPin = await bcrypt.hash(pin, saltRounds);
-  
-      // ✅ Create blockchain address
-      const brAddress = await blockradar.createAddress(blockchain, phoneNumber);
-  
-      const userData = {
-        phoneNumber,
-        pin: hashedPin,
-        blockchain,
-        walletAddress: brAddress.address,
-        walletId: brAddress.id,
-        createdAt: new Date(),
-      };
-  
-      await userRef.set(userData);
-  
-      res.status(201).json({
-        message: 'User registered successfully',
-        user: {
-          phoneNumber,
-          blockchain,
-          walletAddress: brAddress.address,
-          walletId: brAddress.id,
-        },
-      });
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ error: 'Registration failed' });
-    }
-  };
+
+    const hashedPin = await bcrypt.hash(pin, 10);
+
+    // You can also generate a wallet address here using Blockradar
+    const userData = {
+      phoneNumber,
+      pin: hashedPin,
+      createdAt: new Date(),
+    };
+
+    await userRef.set(userData);
+
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Registration failed' });
+  }
+};
+
   
 
 /**
